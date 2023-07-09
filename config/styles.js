@@ -4,6 +4,6 @@ export default {
   text: {
     fontSize: 12,
     fontFamily: 'WorkSans-Regular',
-    color: colors.dark,
+    color: colors.secondary,
   },
 };

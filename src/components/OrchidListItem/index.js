@@ -1,4 +1,4 @@
-import {Image, Pressable, StyleSheet, View} from "react-native";
+import {Image, Pressable, StyleSheet, TouchableOpacity, View} from "react-native";
 
 import colors from "../../../config/colors";
 import HeartSolid from "../../../assets/icons/solid/heart.svg";
@@ -6,7 +6,7 @@ import HeartRegular from "../../../assets/icons/regular/heart.svg";
 import AppText from "../AppText";
 
 const OrchidListItem = ({item, toggleFavourite, navigation}) => {
-    return <View style={styles.listItemContainer}>
+    return <TouchableOpacity style={styles.listItemContainer} onPress={() => navigation.navigate('OrchidDetail', {item})}>
         <Image source={{uri: item.imageUrl}}
                style={styles.image}
         />
@@ -22,11 +22,8 @@ const OrchidListItem = ({item, toggleFavourite, navigation}) => {
             </View>
             <AppText style={styles.listItemName}>{item.name}</AppText>
             <AppText>{item.description}</AppText>
-            {!!toggleFavourite && <Pressable onPress={() => navigation.navigate('OrchidDetail', {item})} style={styles.listItemViewDetailBtn}>
-                <AppText style={{color: colors.primary}}>Xem chi tiết >></AppText>
-            </Pressable>}
         </View>
-    </View>;
+    </TouchableOpacity>;
 }
 
 export default OrchidListItem;

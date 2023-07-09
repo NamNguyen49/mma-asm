@@ -3,13 +3,9 @@ import {useEffect, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import AppScreen from "../../components/AppScreen";
-import OrchidListItem from "../../components/OrchidListItem";
-import ListItemSeparator from "../../components/ListItemSeparator";
 import Archive from "../../../assets/icons/regular/bars-square.svg";
 import colors from "../../../config/colors";
 import AppText from "../../components/AppText";
-import HeartSolid from "../../../assets/icons/solid/heart.svg";
-import HeartRegular from "../../../assets/icons/regular/heart.svg";
 
 const FavouriteOrchidsScreen = (props) => {
     const [data, setData] = useState([]);
