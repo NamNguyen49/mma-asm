@@ -12,6 +12,7 @@ import AppText from "../../components/AppText";
 import styles from "./styles";
 import colors from "../../../config/colors";
 import {createProfile, getProfileByEmail} from "../../clients/profile";
+import {FirebaseErrorCode} from "../../constants/firebase-error-code";
 
 const validationSchema = Yup.object({
     email: Yup.string().email('Email không hợp lệ').required('Trường này là bắt buộc'),
@@ -21,10 +22,6 @@ const validationSchema = Yup.object({
 const LoginScreen = ({contextChanges, navigation}) => {
     const route = useRoute();
     const [model, setModel] = useState({email: '', password: ''});
-
-    const handleFormSubmit = (values) => {
-        console.log(values);
-    };
 
     const signInWithGoogle = async () => {
         try {
@@ -68,6 +65,40 @@ const LoginScreen = ({contextChanges, navigation}) => {
         }
     }
 
+    const loginWithEmailAndPassword = async (values, {setSubmitting}) => {
+        const {email, password} = values;
+
+        setSubmitting(true);
+        const user = await auth().signInWithEmailAndPassword(email, password)
+            .then((userCredential) => userCredential.user)
+            .catch((error) => {
+                let errorMessage;
+                switch (error.code) {
+                    case FirebaseErrorCode.USER_NOT_FOUND:
+                        errorMessage = 'Tài khoản không tồn tại';
+                        break;
+                    case FirebaseErrorCode.INVALID_PASSWORD:
+                        errorMessage = 'Email hoặc mật khẩu không hợp lệ';
+                        break;
+                    default:
+                        console.log(error);
+                        errorMessage = 'Hệ thống đang gặp lỗi';
+                }
+
+                Toast.show({
+                    type: 'error',
+                    text1: errorMessage,
+                });
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
+
+        if (user) {
+            await handleUserProfile(email, user.accessToken);
+        }
+    }
+
     const handleUserProfile = async (email, accessToken) => {
         const userProfile = await getProfileByEmail(email);
         if (!userProfile) {
@@ -98,9 +129,16 @@ const LoginScreen = ({contextChanges, navigation}) => {
             <Formik
                 initialValues={model}
                 validationSchema={validationSchema}
-                onSubmit={handleFormSubmit}
+                onSubmit={loginWithEmailAndPassword}
             >
-                {({handleChange, handleBlur, handleSubmit, values, errors, touched}) => (
+                {({
+                      handleChange,
+                      handleBlur,
+                      handleSubmit, values,
+                      errors,
+                      touched,
+                      isValid,
+                  }) => (
                     <View>
                         <TextInput
                             style={styles.textInput}
@@ -120,7 +158,11 @@ const LoginScreen = ({contextChanges, navigation}) => {
                             secureTextEntry
                         />
                         {errors.password && touched.password && <AppText style={styles.textInputError}>{errors.password}</AppText>}
-                        <TouchableOpacity style={styles.loginBtn} onPress={handleSubmit}>
+                        <TouchableOpacity style={styles.loginBtn} onPress={() => {
+                            if (isValid) {
+                                handleSubmit();
+                            }
+                        }}>
                             <AppText style={styles.loginBtnText}>Đăng nhập</AppText>
                         </TouchableOpacity>
                     </View>

@@ -160,7 +160,11 @@ const ProfileScreen = ({contextChanges, navigation}) => {
                     />
                     {errors.address && touched.address &&
                         <AppText style={styles.textInputError}>{errors.address}</AppText>}
-                    <TouchableOpacity style={styles.loginBtn} onPress={handleSubmit}>
+                    <TouchableOpacity style={styles.loginBtn} onPress={() => {
+                        if (isValid) {
+                            handleSubmit();
+                        }
+                    }}>
                         <AppText style={styles.loginBtnText}>Lưu</AppText>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.loginBtn, {backgroundColor: colors.secondary}]} onPress={logout}>
