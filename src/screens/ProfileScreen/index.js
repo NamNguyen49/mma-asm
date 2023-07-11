@@ -1,19 +1,26 @@
 import {TextInput, TouchableOpacity, View} from "react-native";
 import {Formik} from "formik";
-import {useContext, useEffect, useMemo, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import * as Yup from "yup";
 import DropDownPicker from 'react-native-dropdown-picker';
+import Toast from 'react-native-toast-message';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth from '@react-native-firebase/auth';
 
 import AppText from "../../components/AppText";
 import User from "../../../assets/icons/solid/user.svg";
 import colors from "../../../config/colors";
 import styles from "../LoginScreen/styles";
 import {AppContext} from "../../../App";
+import {getProfileByEmail, updateProfile} from "../../clients/profile";
 
 const validationSchema = Yup.object({
+    firstName: Yup.string().required('Trường này là bắt buộc'),
+    lastName: Yup.string().required('Trường này là bắt buộc'),
+    phone: Yup.string().test('Digits only', 'Số điện thoại không hợp lệ', (value) => /^\d+$/.test(value)),
 });
 
-const ProfileScreen = () => {
+const ProfileScreen = ({contextChanges, navigation}) => {
     const {userInfo} = useContext(AppContext);
     const [model, setModel] = useState(null);
     const [open, setOpen] = useState(false);
@@ -29,9 +36,50 @@ const ProfileScreen = () => {
         setGender(userInfo?.gender);
     }, [userInfo]);
 
-    const handleFormSubmit = (values) => {
-        console.log(values);
-    };
+    const onUpdateProfile = async (values, {setSubmitting}) => {
+        setSubmitting(true);
+        const updatedProfile = await updateProfile(model.id, {...values, gender})
+            .then(() => {
+                return getProfileByEmail(model.email);
+            })
+            .catch((error) => {
+                console.log(error);
+                Toast.show({
+                   type: 'error',
+                   text1: 'Cập nhật thông tin thất bại',
+                });
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
+
+        if (updatedProfile) {
+            Toast.show({
+                type: 'success',
+                text1: 'Cập nhật thông tin thành công',
+            });
+            await AsyncStorage.setItem('userInfo', JSON.stringify(updatedProfile));
+            contextChanges();
+        }
+    }
+
+    const logout = () => {
+        auth().signOut().then(async () => {
+            Toast.show({
+                type: 'success',
+                text1: 'Đăng xuất thành công',
+            });
+            await AsyncStorage.clear()
+            contextChanges();
+            navigation.navigate('Home');
+        }).catch((error) => {
+            console.log(error);
+            Toast.show({
+                type: 'error',
+                text1: 'Hệ thống đang gặp lỗi',
+            });
+        });
+    }
 
     return <View style={{paddingVertical: 30, paddingHorizontal: 15}}>
         <View style={{alignItems: 'center', paddingBottom: 30}}>
@@ -50,7 +98,7 @@ const ProfileScreen = () => {
         {!!model && <Formik
             initialValues={model}
             validationSchema={validationSchema}
-            onSubmit={handleFormSubmit}
+            onSubmit={onUpdateProfile}
         >
             {({handleChange, handleBlur, handleSubmit, values, errors, touched}) => (
                 <View>
@@ -115,8 +163,7 @@ const ProfileScreen = () => {
                     <TouchableOpacity style={styles.loginBtn} onPress={handleSubmit}>
                         <AppText style={styles.loginBtnText}>Lưu</AppText>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.loginBtn, {backgroundColor: colors.secondary}]}
-                                      onPress={handleSubmit}>
+                    <TouchableOpacity style={[styles.loginBtn, {backgroundColor: colors.secondary}]} onPress={logout}>
                         <AppText style={styles.loginBtnText}>Đăng xuất</AppText>
                     </TouchableOpacity>
                 </View>
