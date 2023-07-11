@@ -28,6 +28,7 @@ import CartScreen from "./src/screens/CartScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import LoginNavigationScreen from "./src/screens/LoginNavigationScreen";
+import SignUpScreen from "./src/screens/SignUpScreen";
 
 LogBox.ignoreAllLogs();
 
@@ -139,6 +140,7 @@ export default function App() {
                         <Stack.Screen name="Login">
                             {props => <LoginScreen {...props} contextChanges={() => setContextChanges(true)}/>}
                         </Stack.Screen>
+                        <Stack.Screen name="SignUp" component={SignUpScreen}/>
                     </Stack.Navigator>
                 </View>
             </NavigationContainer>

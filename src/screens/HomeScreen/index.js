@@ -1,9 +1,10 @@
 import {FlatList, View} from 'react-native';
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import ListItemSeparator from "../../components/ListItemSeparator";
 import OrchidListItem from "../../components/OrchidListItem";
+import {AppContext} from "../../../App";
 
 const orchids = [
     {
@@ -79,6 +80,7 @@ const orchids = [
 ];
 
 const HomeScreen = ({route, navigation}) => {
+    const {userInfo} = useContext(AppContext);
     const [data, setData] = useState([]);
 
     useEffect(() => {
@@ -123,7 +125,7 @@ const HomeScreen = ({route, navigation}) => {
         <FlatList
             data={data}
             renderItem={({item}) => {
-                return <OrchidListItem item={item} toggleFavourite={toggleFavourite} navigation={navigation}/>
+                return <OrchidListItem item={item} toggleFavourite={!userInfo ? null : toggleFavourite} navigation={navigation}/>
             }}
             ItemSeparatorComponent={ListItemSeparator}
         />

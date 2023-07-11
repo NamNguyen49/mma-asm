@@ -1,5 +1,5 @@
 import {Dimensions, Image, Pressable, StyleSheet, View} from "react-native";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import colors from "../../../config/colors";
@@ -7,12 +7,14 @@ import AppText from "../../components/AppText";
 import HeartSolid from "../../../assets/icons/solid/heart.svg";
 import HeartRegular from "../../../assets/icons/regular/heart.svg";
 import Arrow from "../../../assets/icons/regular/long-arrow-left.svg";
+import {AppContext} from "../../../App";
 
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round(dimensions.width * 4 / 3);
 const imageWidth = dimensions.width;
 
 const OrchidDetailScreen = ({route, navigation}) => {
+    const {userInfo} = useContext(AppContext);
     const {item} = route.params;
     const [isFavourite, setIsFavourite] = useState(item.isFavourite);
     const [data, setData] = useState([]);
@@ -62,13 +64,13 @@ const OrchidDetailScreen = ({route, navigation}) => {
             <Pressable style={styles.backIcon} onPress={back}>
                 <Arrow width={30} height={30} fill={colors.primary}/>
             </Pressable>
-            <Pressable onPress={toggleFavourite} style={styles.favouriteIcon}>
+            {!!userInfo && <Pressable onPress={toggleFavourite} style={styles.favouriteIcon}>
                 {
                     isFavourite
                         ? <HeartSolid width={40} height={40} fill={colors.primary}/>
                         : <HeartRegular width={40} height={40} fill={colors.primary}/>
                 }
-            </Pressable>
+            </Pressable>}
             <AppText style={styles.name}>{item.name}</AppText>
             <AppText style={styles.description}>{item.description}</AppText>
         </View>
