@@ -1,8 +1,7 @@
-import {FlatList} from 'react-native';
+import {FlatList, View} from 'react-native';
 import {useEffect, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import AppScreen from "../../components/AppScreen";
 import ListItemSeparator from "../../components/ListItemSeparator";
 import OrchidListItem from "../../components/OrchidListItem";
 
@@ -120,7 +119,7 @@ const HomeScreen = ({route, navigation}) => {
         }));
     }
 
-    return <AppScreen>
+    return <View>
         <FlatList
             data={data}
             renderItem={({item}) => {
@@ -128,7 +127,7 @@ const HomeScreen = ({route, navigation}) => {
             }}
             ItemSeparatorComponent={ListItemSeparator}
         />
-    </AppScreen>;
+    </View>;
 }
 
 export default HomeScreen;

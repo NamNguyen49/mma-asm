@@ -1,20 +1,93 @@
-import {Image, Pressable, TextInput, TouchableOpacity, View} from "react-native";
+import {Image, TextInput, TouchableOpacity, View} from "react-native";
+import {useState} from "react";
 import {Formik} from 'formik';
 import * as Yup from 'yup';
+import Toast from 'react-native-toast-message';
+import {useRoute} from "@react-navigation/native";
+import {GoogleSignin} from "@react-native-google-signin/google-signin";
+import auth from '@react-native-firebase/auth';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import AppText from "../../components/AppText";
 import styles from "./styles";
 import colors from "../../../config/colors";
+import {createProfile, getProfileByEmail} from "../../clients/profile";
 
 const validationSchema = Yup.object({
-    username: Yup.string().required('Trường này là bắt buộc'),
+    email: Yup.string().email('Email không hợp lệ').required('Trường này là bắt buộc'),
     password: Yup.string().required('Trường này là bắt buộc'),
 });
 
-const LoginScreen = () => {
+const LoginScreen = ({contextChanges, navigation}) => {
+    const route = useRoute();
+    const [model, setModel] = useState({email: '', password: ''});
+
     const handleFormSubmit = (values) => {
         console.log(values);
     };
+
+    const signInWithGoogle = async () => {
+        try {
+            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+            const { idToken, user } = await GoogleSignin.signIn();
+            const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+            await auth().signInWithCredential(googleCredential);
+
+            const {email, familyName, givenName} = user;
+            const userProfile = await getProfileByEmail(email);
+
+            if (!userProfile) {
+                await createProfile({email, lastName: familyName, firstName: givenName, provider: "google"});
+                await handleUserProfile(email, idToken);
+                return;
+            }
+
+            if (userProfile.provider !== "google") {
+                Toast.show({
+                   type: 'error',
+                   text1: 'Email này đã được sử dụng',
+                });
+                const user = auth().currentUser;
+                await user.delete();
+                return;
+            }
+
+            Toast.show({
+                type: 'success',
+                text1: 'Đăng nhập thành công',
+            });
+
+            await AsyncStorage.setItem("accessToken", idToken);
+            await AsyncStorage.setItem("userInfo", JSON.stringify(userProfile));
+            contextChanges();
+
+            navigation.navigate(route.params.returnUrl ?? 'Home');
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const handleUserProfile = async (email, accessToken) => {
+        const userProfile = await getProfileByEmail(email);
+        if (!userProfile) {
+            Toast.show({
+                type: 'error',
+                text1: 'Đăng nhập thất bại',
+            });
+        }
+
+        Toast.show({
+            type: 'success',
+            text1: 'Đăng nhập thành công',
+        });
+
+        await AsyncStorage.setItem("accessToken", idToken);
+        await AsyncStorage.setItem("userInfo", JSON.stringify(userProfile));
+        contextChanges();
+
+        navigation.navigate(route.params.returnUrl ?? 'Home');
+    }
 
     return <View style={styles.container}>
         <View style={styles.emptyView}></View>
@@ -23,7 +96,7 @@ const LoginScreen = () => {
             <AppText style={styles.greetingText}>Chào mừng bạn đã đến với</AppText>
             <AppText style={styles.brandName}>Orchid Garden</AppText>
             <Formik
-                initialValues={{username: '', password: ''}}
+                initialValues={model}
                 validationSchema={validationSchema}
                 onSubmit={handleFormSubmit}
             >
@@ -31,12 +104,13 @@ const LoginScreen = () => {
                     <View>
                         <TextInput
                             style={styles.textInput}
-                            onChangeText={handleChange('username')}
-                            onBlur={handleBlur('username')}
-                            value={values.username}
-                            placeholder="Tên đăng nhập"
+                            onChangeText={handleChange('email')}
+                            onBlur={handleBlur('email')}
+                            value={values.email}
+                            placeholder="Email"
                         />
-                        {errors.username && touched.username && <AppText style={styles.textInputError}>{errors.username}</AppText>}
+                        {errors.email && touched.email &&
+                            <AppText style={styles.textInputError}>{errors.email}</AppText>}
                         <TextInput
                             style={styles.textInput}
                             onChangeText={handleChange('password')}
@@ -60,9 +134,11 @@ const LoginScreen = () => {
                     <AppText style={{color: colors.primary, fontSize: 14}}> Đăng ký</AppText>
                 </TouchableOpacity>
             </View>
-            <AppText style={{color: colors.medium, textAlign: 'center', paddingTop: 30, paddingBottom: 15, fontSize: 14}}>Hoặc</AppText>
+            <AppText
+                style={{color: colors.medium, textAlign: 'center', paddingTop: 30, paddingBottom: 15, fontSize: 14}}>Hoặc
+                đăng nhập với</AppText>
             <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-                <TouchableOpacity style={{backgroundColor: 'white', borderRadius: 25}}>
+                <TouchableOpacity style={{backgroundColor: 'white', borderRadius: 25}} onPress={signInWithGoogle}>
                     <Image source={require('../../../assets/images/google-icon.png')} style={{height: 50, width: 50}}/>
                 </TouchableOpacity>
             </View>

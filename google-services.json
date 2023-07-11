@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "425714539085",
+    "project_id": "mma-asm",
+    "storage_bucket": "mma-asm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:425714539085:android:195a776d2ddb9ccff11a04",
+        "android_client_info": {
+          "package_name": "com.starryskyots.mma_android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "425714539085-b25t2vm8issvat88u6cs7m0insp50iqu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.starryskyots.mma_android",
+            "certificate_hash": "6aa07ab55482c650a93f6dab68be956677fc05d6"
+          }
+        },
+        {
+          "client_id": "425714539085-96ml4cf338ibn5lfhvb53k3jbr8ef5dn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4k-hl7anm9diLSAMKD1MO7r91yQq_Tuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "425714539085-96ml4cf338ibn5lfhvb53k3jbr8ef5dn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "425714539085-hcliqaa08pocjrhu92dph6f6eg6ls3a7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.starryskyots.mma"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -41,6 +41,8 @@ const styles = StyleSheet.create({
         borderRadius: 7,
         fontFamily: 'WorkSans-Regular',
         marginTop: 10,
+        backgroundColor: 'none',
+        color: colors.secondary,
     },
     textInputError: {
         color: colors.danger,

@@ -12,6 +12,8 @@ import {
     WorkSans_700Bold
 } from '@expo-google-fonts/work-sans';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from 'react-native-toast-message';
+import {GoogleSignin} from "@react-native-google-signin/google-signin";
 
 import HomeScreen from './src/screens/HomeScreen';
 import FavouriteOrchidsScreen from './src/screens/FavouriteOrchidsScreen';
@@ -28,6 +30,14 @@ import LoginScreen from "./src/screens/LoginScreen";
 import LoginNavigationScreen from "./src/screens/LoginNavigationScreen";
 
 LogBox.ignoreAllLogs();
+
+GoogleSignin.configure({
+    webClientId: '425714539085-96ml4cf338ibn5lfhvb53k3jbr8ef5dn.apps.googleusercontent.com'
+});
+
+if(__DEV__) {
+    import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
+}
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -126,10 +136,13 @@ export default function App() {
                             {props => <MainTabNavigator {...props} contextChanges={() => setContextChanges(true)}/>}
                         </Stack.Screen>
                         <Stack.Screen name="OrchidDetail" component={OrchidDetailScreen}/>
-                        <Stack.Screen name="Login" component={LoginScreen}/>
+                        <Stack.Screen name="Login">
+                            {props => <LoginScreen {...props} contextChanges={() => setContextChanges(true)}/>}
+                        </Stack.Screen>
                     </Stack.Navigator>
                 </View>
             </NavigationContainer>
+            <Toast />
         </AppContext.Provider>
     );
 }
