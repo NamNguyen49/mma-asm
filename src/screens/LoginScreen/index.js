@@ -1,4 +1,4 @@
-import {Image, TextInput, TouchableOpacity, View} from "react-native";
+import {Image, ScrollView, TextInput, TouchableOpacity, View, ActivityIndicator} from "react-native";
 import {useState} from "react";
 import {Formik} from 'formik';
 import * as Yup from 'yup';
@@ -59,7 +59,7 @@ const LoginScreen = ({contextChanges, navigation}) => {
             await AsyncStorage.setItem("userInfo", JSON.stringify(userProfile));
             contextChanges();
 
-            navigation.navigate(route.params.returnUrl ?? 'Home');
+            navigation.navigate(route.params?.returnUrl ?? 'Home');
         } catch (error) {
             console.log(error)
         }
@@ -89,20 +89,18 @@ const LoginScreen = ({contextChanges, navigation}) => {
                     type: 'error',
                     text1: errorMessage,
                 });
-            })
-            .finally(() => {
-                setSubmitting(false);
             });
 
         if (user) {
-            await handleUserProfile(email, user.accessToken);
+            await handleUserProfile(email, user);
+            setSubmitting(false);
         }
     }
 
-    const handleUserProfile = async (email, accessToken) => {
+    const handleUserProfile = async (email, user) => {
         const userProfile = await getProfileByEmail(email);
         if (!userProfile) {
-            Toast.show({
+            return Toast.show({
                 type: 'error',
                 text1: 'Đăng nhập thất bại',
             });
@@ -113,14 +111,15 @@ const LoginScreen = ({contextChanges, navigation}) => {
             text1: 'Đăng nhập thành công',
         });
 
+        const idToken = await user.getIdToken();
         await AsyncStorage.setItem("accessToken", idToken);
         await AsyncStorage.setItem("userInfo", JSON.stringify(userProfile));
         contextChanges();
 
-        navigation.navigate(route.params.returnUrl ?? 'Home');
+        navigation.navigate(route.params?.returnUrl ?? 'Home');
     }
 
-    return <View style={styles.container}>
+    return <ScrollView style={styles.container}>
         <View style={styles.emptyView}></View>
         <View style={styles.loginContainer}>
             <AppText style={styles.loginText}>Đăng nhập</AppText>
@@ -138,6 +137,7 @@ const LoginScreen = ({contextChanges, navigation}) => {
                       errors,
                       touched,
                       isValid,
+                      isSubmitting,
                   }) => (
                     <View>
                         <TextInput
@@ -162,8 +162,8 @@ const LoginScreen = ({contextChanges, navigation}) => {
                             if (isValid) {
                                 handleSubmit();
                             }
-                        }}>
-                            <AppText style={styles.loginBtnText}>Đăng nhập</AppText>
+                        }} disabled={isSubmitting}>
+                            {isSubmitting ? <ActivityIndicator/> : <AppText style={styles.loginBtnText}>Đăng nhập</AppText>}
                         </TouchableOpacity>
                     </View>
                 )}
@@ -172,7 +172,7 @@ const LoginScreen = ({contextChanges, navigation}) => {
                 <AppText style={{color: colors.medium, paddingTop: 15, fontSize: 14}}>
                     Bạn chưa có tài khoản?
                 </AppText>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                     <AppText style={{color: colors.primary, fontSize: 14}}> Đăng ký</AppText>
                 </TouchableOpacity>
             </View>
@@ -185,7 +185,7 @@ const LoginScreen = ({contextChanges, navigation}) => {
                 </TouchableOpacity>
             </View>
         </View>
-    </View>;
+    </ScrollView>;
 }
 
 export default LoginScreen;

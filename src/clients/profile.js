@@ -1,4 +1,3 @@
-import {getDocs, query, where, collection, doc, setDoc, serverTimestamp, getDoc} from "firebase/firestore";
 import {omit} from "lodash";
 import firestore from '@react-native-firebase/firestore';
 
@@ -18,27 +17,27 @@ export const getProfileByEmail = async (email) => {
     };
 }
 
-export const createProfile = async (params) => {
-    await profileCollection.doc(profileCollection.doc().id).set({
+export const createProfile = (params) => {
+    return profileCollection.add({
         ...params,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
     });
 }
 
 export const updateProfile = async (id, params) => {
-    await profileCollection.doc(id).set({
+    await profileCollection.doc(id).update({
         ...omit(params, ['id']),
-        updatedAt: serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
     });
 }
 
-export const getProfileById = async (id) => {
-    const docRef = doc(profileCollection, id);
-    const docSnap = await getDoc(docRef);
-
-    return {
-        ...docSnap.data(),
-        id: docSnap.id,
-    };
-}
+// export const getProfileById = async (id) => {
+//     const docRef = doc(profileCollection, id);
+//     const docSnap = await getDoc(docRef);
+//
+//     return {
+//         ...docSnap.data(),
+//         id: docSnap.id,
+//     };
+// }

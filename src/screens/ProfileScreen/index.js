@@ -1,4 +1,4 @@
-import {TextInput, TouchableOpacity, View} from "react-native";
+import {ScrollView, TextInput, TouchableOpacity, View, ActivityIndicator} from "react-native";
 import {Formik} from "formik";
 import {useContext, useEffect, useState} from "react";
 import * as Yup from "yup";
@@ -17,7 +17,7 @@ import {getProfileByEmail, updateProfile} from "../../clients/profile";
 const validationSchema = Yup.object({
     firstName: Yup.string().required('Trường này là bắt buộc'),
     lastName: Yup.string().required('Trường này là bắt buộc'),
-    phone: Yup.string().test('Digits only', 'Số điện thoại không hợp lệ', (value) => /^\d+$/.test(value)),
+    phone: Yup.string().test('Digits only', 'Số điện thoại không hợp lệ', (value) => /(84|0[3|5|7|8|9])+([0-9]{8})\b/g.test(value)),
 });
 
 const ProfileScreen = ({contextChanges, navigation}) => {
@@ -38,29 +38,27 @@ const ProfileScreen = ({contextChanges, navigation}) => {
 
     const onUpdateProfile = async (values, {setSubmitting}) => {
         setSubmitting(true);
-        const updatedProfile = await updateProfile(model.id, {...values, gender})
-            .then(() => {
-                return getProfileByEmail(model.email);
-            })
+        updateProfile(model.id, {...values, gender})
             .catch((error) => {
                 console.log(error);
                 Toast.show({
-                   type: 'error',
-                   text1: 'Cập nhật thông tin thất bại',
+                    type: 'error',
+                    text1: 'Cập nhật thông tin thất bại',
                 });
-            })
-            .finally(() => {
-                setSubmitting(false);
             });
 
-        if (updatedProfile) {
-            Toast.show({
-                type: 'success',
-                text1: 'Cập nhật thông tin thành công',
-            });
-            await AsyncStorage.setItem('userInfo', JSON.stringify(updatedProfile));
-            contextChanges();
-        }
+        setTimeout(() => {
+            getProfileByEmail(model.email).then(async (updatedProfile) => {
+                if (updatedProfile) {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Cập nhật thông tin thành công',
+                    });
+                    await AsyncStorage.setItem('userInfo', JSON.stringify(updatedProfile));
+                    contextChanges();
+                }
+            }).finally(() => setSubmitting(false));
+        }, 300);
     }
 
     const logout = () => {
@@ -81,7 +79,7 @@ const ProfileScreen = ({contextChanges, navigation}) => {
         });
     }
 
-    return <View style={{paddingVertical: 30, paddingHorizontal: 15}}>
+    return <ScrollView style={{paddingVertical: 30, paddingHorizontal: 15}}>
         <View style={{alignItems: 'center', paddingBottom: 30}}>
             <View style={{
                 borderWidth: 5,
@@ -100,7 +98,15 @@ const ProfileScreen = ({contextChanges, navigation}) => {
             validationSchema={validationSchema}
             onSubmit={onUpdateProfile}
         >
-            {({handleChange, handleBlur, handleSubmit, values, errors, touched}) => (
+            {({
+                  handleChange,
+                  handleBlur,
+                  handleSubmit, values,
+                  errors,
+                  touched,
+                  isValid,
+                  isSubmitting,
+              }) => (
                 <View>
                     <TextInput
                         style={styles.textInput}
@@ -164,8 +170,8 @@ const ProfileScreen = ({contextChanges, navigation}) => {
                         if (isValid) {
                             handleSubmit();
                         }
-                    }}>
-                        <AppText style={styles.loginBtnText}>Lưu</AppText>
+                    }} disabled={isSubmitting}>
+                        {isSubmitting ? <ActivityIndicator/> : <AppText style={styles.loginBtnText}>Lưu</AppText>}
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.loginBtn, {backgroundColor: colors.secondary}]} onPress={logout}>
                         <AppText style={styles.loginBtnText}>Đăng xuất</AppText>
@@ -173,7 +179,7 @@ const ProfileScreen = ({contextChanges, navigation}) => {
                 </View>
             )}
         </Formik>}
-    </View>;
+    </ScrollView>;
 }
 
 export default ProfileScreen;
