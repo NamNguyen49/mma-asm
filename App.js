@@ -1,9 +1,9 @@
 import 'react-native-gesture-handler';
-import {LogBox, StyleSheet, View} from "react-native";
-import {createContext, useContext, useEffect, useState} from "react";
-import {NavigationContainer} from '@react-navigation/native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {createStackNavigator} from "@react-navigation/stack";
+import { LogBox, StyleSheet, View } from "react-native";
+import { createContext, useContext, useEffect, useState } from "react";
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from "@react-navigation/stack";
 import {
     useFonts,
     WorkSans_300Light,
@@ -13,7 +13,7 @@ import {
 } from '@expo-google-fonts/work-sans';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from 'react-native-toast-message';
-import {GoogleSignin} from "@react-native-google-signin/google-signin";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 import HomeScreen from './src/screens/HomeScreen';
 import FavouriteOrchidsScreen from './src/screens/FavouriteOrchidsScreen';
@@ -29,6 +29,7 @@ import ProfileScreen from "./src/screens/ProfileScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import LoginNavigationScreen from "./src/screens/LoginNavigationScreen";
 import SignUpScreen from "./src/screens/SignUpScreen";
+import HomeAdmin from './src/admin/HomeAdmin';
 
 LogBox.ignoreAllLogs();
 
@@ -36,7 +37,7 @@ GoogleSignin.configure({
     webClientId: '425714539085-96ml4cf338ibn5lfhvb53k3jbr8ef5dn.apps.googleusercontent.com'
 });
 
-if(__DEV__) {
+if (__DEV__) {
     import('./ReactotronConfig').then(() => console.log('Reactotron Configured'))
 }
 
@@ -44,8 +45,8 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 export const AppContext = createContext({});
 
-const MainTabNavigator = ({contextChanges, navigation}) => {
-    const {userInfo} = useContext(AppContext);
+const MainTabNavigator = ({ contextChanges, navigation }) => {
+    const { userInfo } = useContext(AppContext);
 
     return <Tab.Navigator screenOptions={{
         tabBarActiveTintColor: colors.primary,
@@ -57,11 +58,11 @@ const MainTabNavigator = ({contextChanges, navigation}) => {
             name='Home'
             component={HomeScreen}
             options={{
-                tabBarIcon: ({size, color}) => <HomeSimple width={size} height={size} fill={color}/>,
-                tabBarLabel: ({color}) => <AppText style={{color}}>Trang chủ</AppText>,
+                tabBarIcon: ({ size, color }) => <HomeSimple width={size} height={size} fill={color} />,
+                tabBarLabel: ({ color }) => <AppText style={{ color }}>Trang chủ</AppText>,
             }}
         />
-        <Tab.Screen
+        {/* <Tab.Screen
             name='FavouriteOrchids'
             options={{
                 tabBarIcon: ({size, color}) => <Heart width={size} height={size} fill={color}/>,
@@ -69,23 +70,31 @@ const MainTabNavigator = ({contextChanges, navigation}) => {
             }}
         >
             {props => userInfo ? <FavouriteOrchidsScreen {...props}/> : <LoginNavigationScreen/>}
-        </Tab.Screen>
-        <Tab.Screen
+        </Tab.Screen> */}
+        {/* <Tab.Screen
             name='Cart'
             component={CartScreen}
             options={{
                 tabBarIcon: ({size, color}) => <Cart width={size} height={size} fill={color}/>,
                 tabBarLabel: ({color}) => <AppText style={{color}}>Giỏ hàng</AppText>,
             }}
+        /> */}
+        <Tab.Screen
+            name='HomeAdmin'
+            component={HomeAdmin}
+            options={{
+                tabBarIcon: ({ size, color }) => <Cart width={size} height={size} fill={color} />,
+                tabBarLabel: ({ color }) => <AppText style={{ color }}>Admin</AppText>,
+            }}
         />
         <Tab.Screen
             name='Profile'
             options={{
-                tabBarIcon: ({size, color}) => <User width={size} height={size} fill={color}/>,
-                tabBarLabel: ({color}) => <AppText style={{color}}>Tài khoản</AppText>,
+                tabBarIcon: ({ size, color }) => <User width={size} height={size} fill={color} />,
+                tabBarLabel: ({ color }) => <AppText style={{ color }}>Tài khoản</AppText>,
             }}
         >
-            {props => userInfo ? <ProfileScreen {...props} contextChanges={contextChanges}/> : <LoginNavigationScreen/>}
+            {props => userInfo ? <ProfileScreen {...props} contextChanges={contextChanges} /> : <LoginNavigationScreen />}
         </Tab.Screen>
     </Tab.Navigator>;
 }
@@ -134,13 +143,13 @@ export default function App() {
                         headerShown: false,
                     }}>
                         <Stack.Screen name="MainTabNavigator">
-                            {props => <MainTabNavigator {...props} contextChanges={() => setContextChanges(true)}/>}
+                            {props => <MainTabNavigator {...props} contextChanges={() => setContextChanges(true)} />}
                         </Stack.Screen>
-                        <Stack.Screen name="OrchidDetail" component={OrchidDetailScreen}/>
+                        <Stack.Screen name="OrchidDetail" component={OrchidDetailScreen} />
                         <Stack.Screen name="Login">
-                            {props => <LoginScreen {...props} contextChanges={() => setContextChanges(true)}/>}
+                            {props => <LoginScreen {...props} contextChanges={() => setContextChanges(true)} />}
                         </Stack.Screen>
-                        <Stack.Screen name="SignUp" component={SignUpScreen}/>
+                        <Stack.Screen name="SignUp" component={SignUpScreen} />
                     </Stack.Navigator>
                 </View>
             </NavigationContainer>
